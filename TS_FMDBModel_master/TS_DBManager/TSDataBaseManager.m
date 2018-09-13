@@ -132,7 +132,7 @@
             
             NSString *sqlStr = [self createUpdateSqlTable:className valueDict:propertyDict primary:primary];
             NSLog(@"%@",sqlStr);
-            BOOL res = [_dataBase executeUpdate:sqlStr];
+            BOOL res = [_dataBase executeUpdate:sqlStr withParameterDictionary:propertyDict];
             if (!res) {
                 NSLog(@"更新表中数据失败");
                 [_dataBase close];
@@ -328,16 +328,16 @@
 - (NSString *)createUpdateSqlTable:(NSString *)table valueDict:(NSDictionary *)values primary:(NSString *)primary{
     
     NSArray *keyArr = [values allKeys];
+    
     NSMutableArray *keyValueArr = [NSMutableArray array];
     NSString *primaryKeyValueStr;
     
     for (NSString *key in keyArr) {
         
-        NSString *keyValue = [NSString stringWithFormat:@"%@='%@'",key,values[key]];
+        NSString *keyValue = [NSString stringWithFormat:@" %@ = :%@",key,key];
         
         if ([key isEqualToString:primary]) {
-            primaryKeyValueStr = keyValue;
-            continue;
+            primaryKeyValueStr = [NSString stringWithFormat:@"%@ = '%@'",key,values[key]];
         }
         [keyValueArr addObject:keyValue];
     }
